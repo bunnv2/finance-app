@@ -1,0 +1,155 @@
+/* Styl całej aplikacji */
+.App {
+  text-align: center;
+  font-family: 'Arial', sans-serif;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #ffffff;
+  color: #181818;
+}
+
+.App header {
+  color: rgb(0, 0, 0);
+  background-color: rgb(228, 228, 228);
+  padding: 20px;
+  text-align: center;
+}
+
+.App header h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.App nav button {
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #71717100;
+  color: #000000;
+  border: none;
+  width: 100%;
+}
+
+.App nav button:focus,
+.App nav button:hover {
+  background-color: #535252;
+}
+
+/* Nagłówek aplikacji */
+.App-header {
+  background-color: #282c34;
+  min-height: 10vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: rgb(196, 196, 196);
+}
+
+/* Stylizacja formularza */
+form {
+  margin: 20px;
+}
+
+/* Stylizacja inputów */
+input {
+  margin: 10px;
+  padding: 8px;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Stylizacja select */
+select {
+  margin: 10px;
+  padding: 8px;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+}
+
+/* Stylizacja przycisków */
+button {
+  padding: 10px 20px;
+  background-color: #4CAF50; /* Zielony kolor tła */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #45a049; /* Ciemniejszy odcień zielonego przy najechaniu */
+}
+
+/* Stylizacja listy transakcji */
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  padding: 8px;
+  margin-top: 5px;
+}
+
+/* Stylizacja kwot przychodów i wydatków */
+.income {
+  color: #4CAF50; /* Zielony dla przychodów */
+}
+
+.expense {
+  color: #f44336; /* Czerwony dla wydatków */
+}
+
+button {
+  margin: 5px;
+  padding: 10px 15px;
+  border-radius: 5px;
+  background-color: #4CAF50;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+/* Dodaj oddzielne style, jeśli potrzebne */
+.clear-buttons {
+  margin-top: 20px;
+}
+
+
+/* Stylizacja przycisków rozszerzających */
+.extend-button {
+  margin: 5px;
+  padding: 10px 15px;
+  border-radius: 5px;
+  background-color: #282c34; /* Orange color */
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s;
+}
+
+.extend-button:hover {
+  background-color: #ac9db0;
+}
+
+/* Dodaj oddzielne style, jeśli potrzebne */
+.clear-buttons {
+  margin-top: 20px;
+}
