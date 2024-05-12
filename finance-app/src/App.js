@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ExpenseTracker from './components/ExpenseTracker';
 import FinancialAnalysis from './components/FinancialAnalysis';
 import './App.css';
+import { subscribeUser, unsubscribeUser } from './utils/push-notifications';
 
 function App() {
   const [transactions, setTransactions] = useState(() => {
@@ -57,7 +58,10 @@ function App() {
         <ExpenseTracker transactions={transactions} setTransactions={setTransactions} totalAmount={totalAmount} setTotalAmount={setTotalAmount} /> :
         <FinancialAnalysis transactions={transactions} />
       }
+    <button onClick={subscribeUser}>Subscribe</button>
+    <button onClick={unsubscribeUser}>Unsubscribe</button>
     </div>
+
   );
 }
 

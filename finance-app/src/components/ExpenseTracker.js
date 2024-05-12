@@ -73,16 +73,8 @@ function ExpenseTracker({ transactions, setTransactions, totalAmount, setTotalAm
   };
 
   const clearAll = () => {
-    fetch('http://localhost:8000/unsubscribeAll', {
-      method: 'GET'
-    })
-    .then(response => response.json())
-    .then(data => {
       setTransactions([]);
       setTotalAmount(0);
-      console.log('Unsubscribe all successful:', data);
-    })
-    .catch(err => console.error('Error unsubscribing all:', err));
   };
 
   return (

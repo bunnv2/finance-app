@@ -84,15 +84,4 @@ app.post('/notify', async (req, res) => {
   }
 });
 
-app.get('/unsubscribeAll', async (req, res) => {
-    try {
-        await collection.deleteMany({});
-        console.log('Unsubscribed all users');
-        res.json({ message: 'Unsubscribed all users' });
-    } catch (err) {
-        console.error('Failed to unsubscribe all users:', err);
-        res.status(500).json({ message: 'Failed to unsubscribe all users' });
-    }
-});
-
 app.listen(8000, () => console.log('Server started on port 8000'));
