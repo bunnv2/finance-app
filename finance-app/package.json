@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@craco/craco": "^7.1.0",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -15,7 +16,9 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "start-pwa": "craco start",
     "build": "react-scripts build",
+    "build-pwa": "craco build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -25,6 +28,7 @@
       "react-app/jest"
     ]
   },
+  "cracoConfig": "craco.config.js",
   "browserslist": {
     "production": [
       ">0.2%",
@@ -36,5 +40,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@craco/types": "^7.1.0"
   }
 }
