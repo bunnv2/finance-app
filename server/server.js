@@ -43,6 +43,14 @@ connectDB().catch(console.error);
 app.post('/subscribe', async (req, res) => {
   const subscription = req.body;
   try {
+    // Check if the subscription already exists
+    const exists = await collection.findOne({ endpoint: subscription.endpoint });
+    if (exists) {
+      console.log('Subscription already exists');
+      return res.status(409).json({ message: 'Subscription already exists' });
+    }
+    
+    // Insert new subscription
     await collection.insertOne(subscription);
     console.log('Subscription saved');
     res.status(201).json({ message: 'Subscribed successfully' });
@@ -65,15 +73,14 @@ app.post('/notify', async (req, res) => {
       return res.status(404).json({ message: 'No subscriptions available to send notifications.' });
     }
 
-    const promises = subscriptions.map(subscription => {
-      return webPush.sendNotification(subscription, JSON.stringify(notificationPayload))
-        .catch(err => {
-          console.error('Failed to send notification:', err);
-          if (err.statusCode === 410) { // GCM/FCM returns 410 if the subscription is no longer valid
-            return collection.deleteOne({ _id: subscription._id });
-          }
-        });
-    });
+    const promises = subscriptions.map(subscription => webPush.sendNotification(subscription, JSON.stringify(notificationPayload))
+      .catch(err => {
+        console.error('Failed to send notification:', err);
+        if (err.statusCode === 410) { // GCM/FCM returns 410 if the subscription is no longer valid
+          console.log('Removing invalid subscription from the database');
+          return collection.deleteOne({ _id: subscription._id });
+        }
+      }));
 
     await Promise.all(promises);
     console.log('All notifications sent.');
@@ -83,5 +90,6 @@ app.post('/notify', async (req, res) => {
     res.status(500).json({ error: 'Failed to send notifications' });
   }
 });
+
 
 app.listen(8000, () => console.log('Server started on port 8000'));
