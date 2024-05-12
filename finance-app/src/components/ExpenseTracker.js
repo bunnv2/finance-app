@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function ExpenseTracker({ transactions, setTransactions, totalAmount, setTotalAmount }) {
   const [description, setDescription] = useState('');
@@ -6,11 +6,38 @@ function ExpenseTracker({ transactions, setTransactions, totalAmount, setTotalAm
   const [transactionType, setTransactionType] = useState('income');
   const [error, setError] = useState('');
 
+  const sendPushNotification = async () => {
+    await fetch('http://localhost:8000/notify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ message: 'Warning: Your expenses are close to your budget limit!' })
+    })
+    .then(response => response.json())
+    .then(data => console.log('Notification sent:', data))
+    .catch(err => console.error('Error sending notification:', err));
+  };
+
+  useEffect(() => {
+    checkBudgetThreshold();
+  }, [totalAmount]);
+
+  const checkBudgetThreshold = () => {
+    const totalIncomes = transactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
+    const totalExpenses = transactions.filter(t => t.amount < 0).reduce((sum, t) => sum - t.amount, 0); // expenses are stored as negative
+
+    if (totalExpenses > totalIncomes * 0.9) {
+      sendPushNotification();
+    }
+  };
+
   const updateBalance = (transList) => {
     const total = transList.reduce((acc, curr) => acc + curr.amount, 0);
     setTotalAmount(total);
   };
 
+  
   const addTransaction = (e) => {
     e.preventDefault();
     const newAmount = transactionType === 'expense' ? -Math.abs(amount) : Math.abs(amount);
@@ -26,11 +53,12 @@ function ExpenseTracker({ transactions, setTransactions, totalAmount, setTotalAm
     };
     const updatedTransactions = [...transactions, newTransaction];
     setTransactions(updatedTransactions);
-    updateBalance(updatedTransactions);
     setDescription('');
     setAmount('');
     setTransactionType('income');
+    setTotalAmount(prevTotal => prevTotal + newAmount);  // Update total amount
   };
+
 
   const clearIncomes = () => {
     const filteredTransactions = transactions.filter(t => t.amount < 0);
@@ -45,8 +73,16 @@ function ExpenseTracker({ transactions, setTransactions, totalAmount, setTotalAm
   };
 
   const clearAll = () => {
-    setTransactions([]);
-    setTotalAmount(0);
+    fetch('http://localhost:8000/unsubscribeAll', {
+      method: 'GET'
+    })
+    .then(response => response.json())
+    .then(data => {
+      setTransactions([]);
+      setTotalAmount(0);
+      console.log('Unsubscribe all successful:', data);
+    })
+    .catch(err => console.error('Error unsubscribing all:', err));
   };
 
   return (

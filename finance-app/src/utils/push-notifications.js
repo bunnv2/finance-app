@@ -2,7 +2,7 @@ export function subscribeUser() {
     navigator.serviceWorker.ready.then(function(registration) {
       const subscribeOptions = {
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array('BF7ie_3ymTyqYxzfT7IAIoqbTAdb42H5UQdWWIzTpYlIYNIQWj9Cl_zSz4vS-LOY-6iY0NJKxoYTAQukvFGONiU')
+        applicationServerKey: urlBase64ToUint8Array('BPCTljDDgqnfjRLNlghwE22T2XnJW8_Z79GsLJsqOgRwgljeEmzW7-E-IWjsDtf69H9FkD_Mo6vgt2Vxqti5FLA')
       };
   
       return registration.pushManager.subscribe(subscribeOptions);

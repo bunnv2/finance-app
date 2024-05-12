@@ -1,18 +1,22 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const webPush = require('web-push');
-const app = express();
 const cors = require('cors');
-require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const app = express();
+const dotenv = require('dotenv');
+dotenv.config();
 
-
+// Properly configure CORS
+app.use(cors({
+  origin: "*", // Adjust this to your specific frontend URL for production
+  optionsSuccessStatus: 200
+}));
 app.use(bodyParser.json());
 
-cors({credentials: true, origin: true});
-app.use(cors());
-
-const vapidKeys = webPush.generateVAPIDKeys();
+const vapidKeys = {
+  publicKey: "BPCTljDDgqnfjRLNlghwE22T2XnJW8_Z79GsLJsqOgRwgljeEmzW7-E-IWjsDtf69H9FkD_Mo6vgt2Vxqti5FLA",
+  privateKey: "x8hc5g0EknCi5C28JHjJ4UjX7-MBEuflsySFUH8SEkw"
+};
 
 webPush.setVapidDetails(
   'mailto:example@yourdomain.com',
@@ -20,70 +24,75 @@ webPush.setVapidDetails(
   vapidKeys.privateKey
 );
 
-// const uri = process.env.MONGODB_URI;
-const uri = "mongodb+srv://zadanie3:zadanie3@pwa-app.6bue08s.mongodb.net/?retryWrites=true&w=majority&appName=pwa-app"
+// MongoDB connection
+const { MongoClient } = require('mongodb');
+const uri = "mongodb+srv://zadanie3:zadanie3@pwa-app.6bue08s.mongodb.net/?retryWrites=true&w=majority&appName=pwa-app";
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
+let db, collection;
+
+async function connectDB() {
+  await client.connect();
+  db = client.db('pwa-app');
+  collection = db.collection('subscriptions');
+  console.log("Connected to MongoDB!");
+}
+
+connectDB().catch(console.error);
+
+app.post('/subscribe', async (req, res) => {
+  const subscription = req.body;
+  try {
+    await collection.insertOne(subscription);
+    console.log('Subscription saved');
+    res.status(201).json({ message: 'Subscribed successfully' });
+  } catch (err) {
+    console.error('Failed to subscribe', err);
+    res.status(500).json({ message: 'Failed to subscribe' });
   }
 });
 
-async function run() {
-  await client.connect();
-  await client.db("pwa-app").command({ ping: 1 });
-  console.log("Pinged your deployment. You successfully connected to MongoDB!");
-}
+app.post('/notify', async (req, res) => {
+  const notificationPayload = {
+    title: 'Notification Title',
+    body: req.body.message,
+  };
+
+  try {
+    const subscriptions = await collection.find({}).toArray();
+    if (subscriptions.length === 0) {
+      console.log('No subscriptions found.');
+      return res.status(404).json({ message: 'No subscriptions available to send notifications.' });
+    }
+
+    const promises = subscriptions.map(subscription => {
+      return webPush.sendNotification(subscription, JSON.stringify(notificationPayload))
+        .catch(err => {
+          console.error('Failed to send notification:', err);
+          if (err.statusCode === 410) { // GCM/FCM returns 410 if the subscription is no longer valid
+            return collection.deleteOne({ _id: subscription._id });
+          }
+        });
+    });
+
+    await Promise.all(promises);
+    console.log('All notifications sent.');
+    res.json({ message: 'Notifications sent successfully.' });
+  } catch (err) {
+    console.error('Error in sending notifications:', err);
+    res.status(500).json({ error: 'Failed to send notifications' });
+  }
+});
+
+app.get('/unsubscribeAll', async (req, res) => {
+    try {
+        await collection.deleteMany({});
+        console.log('Unsubscribed all users');
+        res.json({ message: 'Unsubscribed all users' });
+    } catch (err) {
+        console.error('Failed to unsubscribe all users:', err);
+        res.status(500).json({ message: 'Failed to unsubscribe all users' });
+    }
+});
 
 app.listen(8000, () => console.log('Server started on port 8000'));
-run().catch(console.dir);
-
-const db = client.db('pwa-app');
-const collection = db.collection('subscriptions');
-
-app.post('/subscribe', (req, res) => {
-    const subscription = req.body;
-    collection.insertOne(subscription, (err, result) => {
-        if (err) {
-            console.error('An error occurred while inserting the subscription:', err);
-            res.status(500).json({ message: 'Failed to subscribe' });
-            return;
-        }
-
-        res.status(201).json({ message: 'Subscribed successfully' });
-    });
-});
-
-app.post('/notify', (req, res) => {
-    const notificationPayload = {
-        title: 'High Expense Alert',
-        body: req.body.message,
-    };
-
-    collection.find({}).toArray((err, subscriptions) => {
-        if (err) {
-            console.error('An error occurred while fetching subscriptions:', err);
-            res.status(500).json({ message: 'Failed to send notifications' });
-            return;
-        }
-
-        const promises = [];
-        subscriptions.forEach(sub => {
-            promises.push(
-                webPush.sendNotification(sub, JSON.stringify(notificationPayload))
-                    .catch(error => {
-                        console.error("Error sending notification, reason: ", error);
-                        collection.deleteOne({ endpoint: sub.endpoint });
-                    })
-            );
-        });
-
-        Promise.all(promises).then(() => res.json({ message: 'Notifications sent successfully.' }));
-    });
-});
-
-
-
-
