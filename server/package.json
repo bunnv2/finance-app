@@ -18,5 +18,8 @@
     "express": "^4.19.2",
     "mongodb": "^6.6.1",
     "web-push": "^3.6.7"
+  },
+  "devDependencies": {
+    "workbox-webpack-plugin": "^7.1.0"
   }
 }
